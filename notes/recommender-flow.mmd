@@ -1,0 +1,52 @@
+flowchart TD
+    subgraph INPUT["INPUT - Profile and Dataset"]
+        U(["👤 User Preferences"])
+        P["🎯 genre[] and mood[]\nenergy.target=0.30 (tol 0.12)\nvalence.target=0.60 (tol 0.15)\ntempo_bpm.target=82 (tol 10)"]
+        U --> P
+    end
+
+    P --> L
+
+    subgraph PROCESS["PROCESS - Score Every Song in songs.csv"]
+        L["📥 Load songs.csv"] --> I["🔁 Iterate each song row"]
+
+        I --> R1["🏷️ Rule 1: Genre Match\nif song.genre in profile.genre -> +2.5\nelse +0"]
+        I --> R2["🙂 Rule 2: Mood Match\nif song.mood in profile.mood -> +2.0\nelse +0"]
+        I --> R3["⚡ Rule 3: Energy Similarity\nsim(|energy-0.30|, 0.12, 2.0)"]
+        I --> R4["🌈 Rule 4: Valence Similarity\nsim(|valence-0.60|, 0.15, 1.5)"]
+        I --> R5["🎵 Rule 5: Tempo Similarity\nsim(|tempo_bpm-82|, 10, 1.5)"]
+        I --> R6["⚠️ Rule 6: Contrast Penalty\nif |energy-0.30| >= 0.30 -> -1.0\nif |tempo_bpm-82| >= 35 -> -0.5"]
+
+        R1 --> S
+        R2 --> S
+        R3 --> S
+        R4 --> S
+        R5 --> S
+        R6 --> S
+
+        S["🧮 Final Score\nscore = genre + mood + energy + valence + tempo - penalty\nfinalScore = min(10, max(0, score))"] --> T["💾 Store (song_id, finalScore)"]
+    end
+
+    T --> O1
+
+    subgraph OUTPUT["OUTPUT - Ranked Top K"]
+        O1["📊 Sort by finalScore (desc)"] --> O2["✅ Select Top K songs"]
+        O2 --> O3(["🏆 Ranked Recommendations"])
+    end
+
+    classDef input fill:#D9EEFF,stroke:#1E3A8A,stroke-width:2px,color:#0B1F4D
+    classDef process fill:#EDE4FF,stroke:#5B21B6,stroke-width:2px,color:#2E1065
+    classDef rule fill:#F3E8FF,stroke:#7E22CE,stroke-width:2px,color:#3B0764
+    classDef score fill:#FCE7F3,stroke:#BE185D,stroke-width:2px,color:#831843
+    classDef output fill:#DCFCE7,stroke:#15803D,stroke-width:2px,color:#14532D
+    classDef decision fill:#FEF3C7,stroke:#B45309,stroke-width:2px,color:#7C2D12
+
+    class U,P input
+    class L,I process
+    class R1,R2,R3,R4,R5,R6 rule
+    class S,T score
+    class O1,O2,O3 output
+
+    style INPUT fill:#1E3A8A,color:#FFFFFF,stroke:#60A5FA,stroke-width:2px
+    style PROCESS fill:#5B21B6,color:#FFFFFF,stroke:#C4B5FD,stroke-width:2px
+    style OUTPUT fill:#166534,color:#FFFFFF,stroke:#86EFAC,stroke-width:2px

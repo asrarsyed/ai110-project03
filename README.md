@@ -20,13 +20,13 @@ Replace this paragraph with your own summary of what your version does.
 Real-world recommenders (like Spotify or YouTube) use complex systems with user behavior, collaborative filtering, and content signals to rank results. This project keeps things simple by using a content-based approach that is easy to understand, adjust, and works well with small datasets without needing lots of user data.
 
 - What features does each `Song` use in your system:
-    - Each song is represented by identity fields plus a small set of categorical and numeric vibe features so the model can compare user intent directly to song attributes. This keeps matching behavior understandable while still capturing both style (`genre`, `mood`) and intensity/feel (`energy`, `valence`, `tempo_bpm`, etc.).
+    - Each song includes identity fields plus the core matching features `genre`, `mood`, `energy`, `valence`, and `tempo_bpm`, so the system can compare style, vibe, and pace in a clear way.
 - What information does your `UserProfile` store:
-    - The user profile stores preferred categorical tags (genre, mood) and target values for numeric audio features on a normalized 0-1 scale. In this simulation, the profile is explicit and static (entered preferences), rather than learned from long histories of implicit behavior.
+    - The profile stores lists of preferred `genre` and `mood`, plus target and tolerance values for `energy`, `valence`, and `tempo_bpm`; these values are entered directly instead of learned from behavior history.
 - How does your `Recommender` compute a score for each song:
-    - The recommender computes a categorical match score (`genre_score`, `mood_score`) plus a weighted numeric similarity score from feature distances (energy, valence, tempo, danceability, acousticness). It then combines them into one final score from 0 to 1 using tuned top-level weights (default: genre 0.35, mood 0.25, numeric 0.40), which makes user-to-song mapping explicit.
+    - The recommender uses a 10-point rule: genre match adds `+2.5`, mood match adds `+2.0`, energy/valence/tempo add similarity points based on distance from targets, and a contrast penalty lowers scores for strong chill-vs-intense mismatch before clamping to `0-10`.
 - How do you choose which songs to recommend:
-  - After scoring all songs, the system filters by a minimum threshold (for example, >= 0.60), sorts descending, applies deterministic tie-breakers, and returns top-K. This ranking rule improves consistency and debuggability, while trading off some novelty/diversity that production systems often recover with extra reranking stages.
+  - After every song is scored, the system stores the result, sorts all songs by final score from highest to lowest, and returns the top-K recommendations.
 
 ### Song Object (Core Attributes)
 
@@ -38,13 +38,13 @@ Real-world recommenders (like Spotify or YouTube) use complex systems with user 
 
 ### UserProfile Object (Core Attributes)
 
-- `preferred_genre`: explicit stylistic preference used for exact categorical matching.
-- `preferred_mood`: explicit session-intent target used for categorical matching.
-- `target_energy`: desired intensity level for numeric distance scoring.
-- `target_valence`: desired emotional tone used to reduce mood mismatch among similar songs.
-- `target_tempo_bpm`: desired pacing target for rhythm and activity fit.
+- `genre`: list of preferred genres used for exact categorical matching.
+- `mood`: list of preferred moods used for exact categorical matching.
+- `energy` (`target`, `tolerance`): desired intensity level and acceptable range.
+- `valence` (`target`, `tolerance`): desired emotional tone and acceptable range.
+- `tempo_bpm` (`target`, `tolerance`): desired pace and acceptable range.
 
-This design compares each user preference to matching song features, turns them into scores, and combines them into one final ranking. Unlike production systems, it has less personalization and no crowd-based learning, but it is easier to understand, control, and test.
+This design follows a simple flow: take user preferences, load songs, score each song with the same rules, then rank results. It has less personalization than production systems, but it is easy to understand, tune, and test.
 
 ---
 
