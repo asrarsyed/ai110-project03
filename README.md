@@ -2,16 +2,7 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
-
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+This project builds a small rule-based music recommender. I give it a user profile, it scores each song in the CSV, and returns the top matches. My version also handles messy inputs better, penalizes contradictory profiles, and adds a light diversity step so the top list is less repetitive. The system is simple on purpose, so I can inspect why each song was ranked where it was.
 
 ---
 
@@ -50,25 +41,20 @@ This design follows a simple flow: take user preferences, load songs, score each
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
-
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+- I tested five normal presets (pop, lofi, rock, dance, and calm acoustic) to check if top results felt reasonable.
+- I ran adversarial profiles, like calm mood with very high tempo, empty category preferences, and very broad category lists.
+- I compared baseline scoring against two variants: stronger energy/weaker genre, and mood scoring turned off.
+- I also ran a fairness script that compared average top-5 scores across profile groups.
+- Main finding: rank order was often stable, but score confidence changed a lot under different settings.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
-
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+This recommender still has clear limits. The catalog is tiny, so it cannot represent many taste styles.  
+It relies on labels and a few numeric features, so it does not understand lyrics, context, or cultural meaning.  
+Rare genre/mood wording can still underperform even with alias handling.  
+Because scores are deterministic, users can learn how to game profile settings to push certain songs up.
 
 ---
 
@@ -78,10 +64,9 @@ Read and complete `model_card.md`:
 
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+I learned that even a basic recommender can feel useful when the scoring rules are clear. Breaking the score into simple parts made debugging much easier. It also helped me see why the same songs can keep winning when the data is small and the rules are fixed.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
+I also learned how bias can appear without any advanced machine learning. If a user’s labels are less represented, their results can look weaker even when the code is “working.” That made fairness checks feel necessary, not optional, even for a classroom project.
 
 ---
 
@@ -117,3 +102,17 @@ python -m pytest tests/ -v
 ```
 
 You can add more tests in `tests/test_recommender.py`.
+
+---
+
+## Images
+
+<a href="images/cli-verification.png" target="_blank"><img src='images/cli-verification.png' title='' width='' alt='' class='center-block' /></a>
+
+<a href="images/adversarial-profile01.png" target="_blank"><img src='images/adversarial-profile01.png' title='' width='' alt='' class='center-block' /></a>
+
+<a href="images/adversarial-profile02.png" target="_blank"><img src='images/adversarial-profile02.png' title='' width='' alt='' class='center-block' /></a>
+
+<a href="images/fairness-sensitivity-diagnostic.png" target="_blank"><img src='images/fairness-sensitivity-diagnostic.png' title='' width='' alt='' class='center-block' /></a>
+
+<a href="images/final.png" target="_blank"><img src='images/final.png' title='' width='' alt='' class='center-block' /></a>

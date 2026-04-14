@@ -1,123 +1,45 @@
-# Model Card: Music Recommender Simulation
+# Model Card: LoopIntensity
 
-## 1. Model Name
+## Model Name
+**LoopIntensity**
 
-Give your recommender a short, descriptive name.
+## Goal / Task
+This recommender suggests top songs for a user profile.  
+It tries to match the user on genre, mood, and vibe features like energy, valence, and tempo.  
+The goal is to return songs that feel close to the user’s current taste.
 
-Example: **VibeFinder 1.0**
+## Data Used
+The dataset has 20 songs from `data/songs.csv`.  
+Each song has genre, mood, energy, tempo, valence, danceability, and acousticness.  
+The catalog is small, so coverage is limited.  
+Some genres and moods have only one or two songs, which limits variety.
 
----
+## Algorithm Summary
+Each song gets points from simple rules.  
+It gets points for genre match, mood match, and closeness to target energy, valence, and tempo.  
+It loses points when the song strongly conflicts with the profile.  
+Scores are clamped to 0–10, then songs are ranked by score.  
+The system also normalizes aliases, penalizes contradictory profiles, and reranks to improve diversity in top results.
 
-## 2. Intended Use
+## Observed Behavior / Biases
+Results are deterministic, so the same input gives the same ranking every run.  
+Profiles with rare labels can get weaker results than common profiles.  
+In fairness checks, the rare-label group had lower average top-5 scores than chill and high-energy groups.  
+The model can still miss nuance because it depends on a small label-based catalog.
 
-Describe what this recommender is designed to do and who it is for.
+## Evaluation Process
+I tested standard presets like High-Energy Pop, Chill Lofi, Deep Intense Rock, Upbeat Dance, and Soft Acoustic Calm.  
+I also tested adversarial profiles, including conflicting preferences, no-category profiles, and category-spam profiles.  
+I ran sensitivity experiments with weight shifts and mood-off scoring.  
+One key result was stable top-5 overlap in one test even when scores changed, which showed rank stability but confidence movement.
 
-Prompts:
+## Intended Use and Non-Intended Use
+Intended use: classroom demos and simple music preference experiments.  
+It is good for showing transparent scoring behavior and testing profile design.  
+Non-intended use: production music streaming recommendations for real users at scale.  
+It should not be used for high-stakes personalization decisions.
 
-- What kind of recommendations does it generate (for example, top 3 to 5 songs)
-- Who is the intended audience
-- What assumptions does it make about the user
-- Is this for real users or classroom exploration
-
----
-
-## 3. How the Model Works
-
-Explain your scoring approach in simple language.
-
-Prompts:
-
-- What song features are used (genre, mood, energy, etc.)
-- What user preferences are considered
-- How those inputs are turned into a score
-- What changed from the starter logic
-
-Avoid code here. Explain it like you are talking to someone who does not program.
-
----
-
-## 4. Data
-
-Describe the dataset the model uses.
-
-Prompts:
-
-- How many songs are in `data/songs.csv`
-- What genres or moods are represented
-- Did you add or remove any songs
-- Whose musical taste this dataset mostly reflects
-- Are there parts of musical taste missing in the data
-
----
-
-## 5. Strengths
-
-Where does your recommender seem to work well?
-
-Prompts:
-
-- User profiles for which it gives reasonable results
-- Cases where the top results felt right or matched your intuition
-- Patterns your scoring seems to capture correctly
-- Any benefits of the model being simple and transparent
-
----
-
-## 6. Limitations and Bias
-
-Where does the system struggle or behave unfairly?
-
-Prompts:
-
-- Important features it does not consider
-- Genres or moods that are underrepresented
-- Cases where it overfits to one preference (for example, always favoring energy)
-- Whether it treats all users as if they have the same taste shape
-- Ways the scoring might unintentionally favor some users over others
-
-One weakness I found is that users with rare labels can get weaker recommendations than users with common labels. In my fairness check, a "rare-label" profile (like drum & bass plus uplifted mood wording) scored much lower on average than a chill profile. This happens because the model still depends heavily on what labels exist in the small dataset, even with alias matching. So if your taste language is less represented, the system can underrate songs that might still fit you.
-
----
-
-## 7. Evaluation
-
-How did you check whether the recommender behaved as expected?
-
-Prompts:
-
-- Which user profiles you tested
-- What you looked for in the recommendations
-- What surprised you
-- Any simple tests, comparisons, or reasoning checks you ran
-- If relevant, how your outputs compare to recommendations from real apps
-
-No numeric metrics are required unless you created them.
-
-I tested profiles such as High-Energy Pop, Chill Lofi, Deep Intense Rock, Upbeat Dance, and Soft Acoustic Calm, and I also ran adversarial profiles (conflicting preferences, no category signal, and category spam). I compared baseline rankings to two sensitivity runs: weight-shift (higher energy weight, lower genre weight) and mood-off. What surprised me most was that after fixing preset schema, top songs stayed stable for some profiles even when weights changed, but their scores changed a lot, which showed the ranking can be robust while confidence shifts underneath. Another surprise was the fairness spread: rare-label profiles still had noticeably lower average top-5 scores than common-label profiles.
-
----
-
-## 8. Future Work
-
-If you had more time, how would you improve this recommender?
-
-Prompts:
-
-- Additional features or user preferences
-- Better ways to explain why each recommendation was selected
-- Improving diversity among top results
-- Handling more complex or mixed tastes
-- Support for multi-user or group recommendations
-
----
-
-## 9. Personal Reflection
-
-A few sentences about your experience.
-
-Prompts:
-
-- What you learned about recommender systems
-- Something unexpected or interesting you discovered
-- How this changed the way you think about music recommendation apps
-- Where human judgment still matters even when a model seems smart
+## Ideas for Improvement
+1. Expand the dataset with more songs and better label coverage.
+2. Learn feature weights from feedback instead of fixed manual weights.
+3. Add richer explainability and stronger fairness checks across more profile groups.
