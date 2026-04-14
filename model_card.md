@@ -75,6 +75,8 @@ Prompts:
 - Whether it treats all users as if they have the same taste shape
 - Ways the scoring might unintentionally favor some users over others
 
+One weakness I found is that users with rare labels can get weaker recommendations than users with common labels. In my fairness check, a "rare-label" profile (like drum & bass plus uplifted mood wording) scored much lower on average than a chill profile. This happens because the model still depends heavily on what labels exist in the small dataset, even with alias matching. So if your taste language is less represented, the system can underrate songs that might still fit you.
+
 ---
 
 ## 7. Evaluation
@@ -90,6 +92,8 @@ Prompts:
 - If relevant, how your outputs compare to recommendations from real apps
 
 No numeric metrics are required unless you created them.
+
+I tested profiles such as High-Energy Pop, Chill Lofi, Deep Intense Rock, Upbeat Dance, and Soft Acoustic Calm, and I also ran adversarial profiles (conflicting preferences, no category signal, and category spam). I compared baseline rankings to two sensitivity runs: weight-shift (higher energy weight, lower genre weight) and mood-off. What surprised me most was that after fixing preset schema, top songs stayed stable for some profiles even when weights changed, but their scores changed a lot, which showed the ranking can be robust while confidence shifts underneath. Another surprise was the fairness spread: rare-label profiles still had noticeably lower average top-5 scores than common-label profiles.
 
 ---
 
